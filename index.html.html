@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Jeopardy - English Basics</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			padding: 20px;
+			background-color: #10141F;
+			font-family: system-ui, Arial, sans-serif;
+			color: #FFFFFF;
+		}
+
+		h1 {
+			text-align: center;
+			margin-bottom: 5px;
+			font-size: 28px;
+		}
+
+		.subtitle {
+			text-align: center;
+			color: #B8BCC8;
+			margin-bottom: 20px;
+			font-size: 14px;
+		}
+
+		.scoreboard {
+			display: flex;
+			justify-content: center;
+			gap: 30px;
+			margin-bottom: 20px;
+			flex-wrap: wrap;
+		}
+
+		.team-box {
+			background-color: #1B2033;
+			border: 2px solid #2EC4B6;
+			border-radius: 14px;
+			padding: 12px 20px;
+			text-align: center;
+			min-width: 180px;
+		}
+
+		.team-box.teamB {
+			border-color: #FF7F50;
+		}
+
+		.team-box input {
+			background: transparent;
+			border: none;
+			border-bottom: 1px solid #4A4F63;
+			color: #FFFFFF;
+			font-size: 16px;
+			font-weight: bold;
+			text-align: center;
+			width: 140px;
+			padding: 4px;
+			margin-bottom: 6px;
+			font-family: system-ui, Arial, sans-serif;
+		}
+
+		.team-score {
+			font-size: 26px;
+			font-weight: bold;
+		}
+
+		.board {
+			display: grid;
+			grid-template-columns: repeat(5, 1fr);
+			gap: 8px;
+			max-width: 1000px;
+			margin: 0 auto;
+		}
+
+		.cat-header {
+			border-radius: 12px;
+			padding: 12px 6px;
+			text-align: center;
+			font-weight: bold;
+			font-size: 14px;
+			color: #10141F;
+			min-height: 55px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.point-card {
+			border-radius: 12px;
+			padding: 18px 6px;
+			text-align: center;
+			font-weight: bold;
+			font-size: 20px;
+			cursor: pointer;
+			color: #10141F;
+			border: none;
+			transition: transform 0.1s;
+		}
+
+		.point-card:active {
+			transform: scale(0.97);
+		}
+
+		.point-card.used {
+			background-color: #2A2E3D !important;
+			color: #565A6B;
+			cursor: default;
+		}
+
+		.reset-wrap {
+			text-align: center;
+			margin-top: 25px;
+		}
+
+		.reset-btn {
+			background-color: #1B2033;
+			border: 2px solid #FF7F50;
+			color: #FFFFFF;
+			padding: 10px 22px;
+			border-radius: 12px;
+			font-size: 15px;
+			cursor: pointer;
+			font-family: system-ui, Arial, sans-serif;
+		}
+
+		.overlay {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: rgba(0, 0, 0, 0.75);
+			z-index: 100;
+			align-items: center;
+			justify-content: center;
+			padding: 15px;
+		}
+
+		.overlay.active {
+			display: flex;
+		}
+
+		.popup {
+			background-color: #1B2033;
+			border-radius: 16px;
+			padding: 30px;
+			max-width: 600px;
+			width: 100%;
+			text-align: center;
+			border: 2px solid #4A4F63;
+		}
+
+		.popup .cat-tag {
+			display: inline-block;
+			padding: 5px 14px;
+			border-radius: 8px;
+			color: #10141F;
+			font-weight: bold;
+			font-size: 13px;
+			margin-bottom: 10px;
+		}
+
+		.popup .points-tag {
+			color: #B8BCC8;
+			font-size: 14px;
+			margin-bottom: 18px;
+		}
+
+		.popup .question-text {
+			font-size: 20px;
+			margin-bottom: 20px;
+			line-height: 1.4;
+		}
+
+		.popup .answer-box {
+			background-color: #10141F;
+			border-radius: 12px;
+			padding: 16px;
+			margin-bottom: 20px;
+			text-align: left;
+			display: none;
+		}
+
+		.popup .answer-box.show {
+			display: block;
+		}
+
+		.popup .answer-box .ans-label {
+			color: #2EC4B6;
+			font-weight: bold;
+			margin-bottom: 6px;
+		}
+
+		.btn {
+			background-color: #2EC4B6;
+			color: #10141F;
+			border: none;
+			padding: 10px 20px;
+			border-radius: 10px;
+			font-size: 15px;
+			font-weight: bold;
+			cursor: pointer;
+			margin: 5px;
+			font-family: system-ui, Arial, sans-serif;
+		}
+
+		.team-btns {
+			display: none;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 8px;
+			margin-top: 10px;
+		}
+
+		.team-btns.show {
+			display: flex;
+		}
+
+		.team-btns .btn.a-right {
+			background-color: #2EC4B6;
+		}
+
+		.team-btns .btn.a-wrong {
+			background-color: #7A2E27;
+			color: #FFFFFF;
+		}
+
+		.team-btns .btn.b-right {
+			background-color: #FF7F50;
+		}
+
+		.team-btns .btn.b-wrong {
+			background-color: #7A2E27;
+			color: #FFFFFF;
+		}
+
+		.close-btn {
+			background-color: #4A4F63;
+			color: #FFFFFF;
+			margin-top: 15px;
+		}
+
+		.confirm-box {
+			background-color: #1B2033;
+			border-radius: 16px;
+			padding: 30px;
+			max-width: 400px;
+			width: 100%;
+			text-align: center;
+			border: 2px solid #FF7F50;
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>English Basics</h1>
+	<p class="subtitle">Jeopardy fuer den Englischunterricht - Klasse 8, Foerderschule Lernen</p>
+
+	<div class="scoreboard">
+		<div class="team-box">
+			<input type="text" id="teamAName" value="Team A">
+			<div class="team-score" id="teamAScore">0</div>
+		</div>
+		<div class="team-box teamB">
+			<input type="text" id="teamBName" value="Team B">
+			<div class="team-score" id="teamBScore">0</div>
+		</div>
+	</div>
+
+	<div class="board" id="board"></div>
+
+	<div class="reset-wrap">
+		<button class="reset-btn" id="resetBtn">Spiel zuruecksetzen</button>
+	</div>
+
+	<div class="overlay" id="questionOverlay">
+		<div class="popup">
+			<div class="cat-tag" id="popupCat"></div>
+			<div class="points-tag" id="popupPoints"></div>
+			<div class="question-text" id="popupQuestion"></div>
+			<button class="btn" id="showAnswerBtn">Antwort anzeigen</button>
+			<div class="answer-box" id="answerBox">
+				<div class="ans-label">Musterloesung:</div>
+				<div id="answerText"></div>
+			</div>
+			<div class="team-btns" id="teamBtns">
+				<button class="btn a-right" id="aRightBtn">Team A richtig</button>
+				<button class="btn a-wrong" id="aWrongBtn">Team A falsch</button>
+				<button class="btn b-right" id="bRightBtn">Team B richtig</button>
+				<button class="btn b-wrong" id="bWrongBtn">Team B falsch</button>
+			</div>
+			<br>
+			<button class="btn close-btn" id="closePopupBtn">Schliessen</button>
+		</div>
+	</div>
+
+	<div class="overlay" id="resetOverlay">
+		<div class="confirm-box">
+			<p style="font-size:18px; margin-bottom:20px;">Spiel wirklich zuruecksetzen? Alle Punkte und Karten werden geloescht.</p>
+			<button class="btn" id="confirmResetYes">Ja, zuruecksetzen</button>
+			<button class="btn close-btn" id="confirmResetNo">Abbrechen</button>
+		</div>
+	</div>
+
+	<script>
+		var categories = [{
+				name: "Colours",
+				color: "#2EC4B6",
+				questions: [
+					{ points: 100, question: "What colour is a banana?", answer: "Yellow. (gelb)" },
+					{ points: 200, question: "What colour is the sky on a sunny day?", answer: "Blue. (blau)" },
+					{ points: 300, question: "What colour is grass?", answer: "Green. (gruen)" },
+					{ points: 400, question: "Name two colours you can mix to make green.", answer: "Yellow and blue. (gelb und blau)" },
+					{ points: 500, question: "What colour are an apple, a tomato and a strawberry?", answer: "Red. (rot)" }
+				]
+			},
+			{
+				name: "Numbers",
+				color: "#FF7F50",
+				questions: [
+					{ points: 100, question: "What is the English word for the number 5?", answer: "Five." },
+					{ points: 200, question: "What is the English word for the number 10?", answer: "Ten." },
+					{ points: 300, question: "What is the English word for the number 12?", answer: "Twelve." },
+					{ points: 400, question: "What is the English word for the number 20?", answer: "Twenty." },
+					{ points: 500, question: "Say this number in English: 15", answer: "Fifteen." }
+				]
+			},
+			{
+				name: "Animals",
+				color: "#B388EA",
+				questions: [
+					{ points: 100, question: "What is the English word for 'Katze'?", answer: "Cat." },
+					{ points: 200, question: "What is the English word for 'Hund'?", answer: "Dog." },
+					{ points: 300, question: "What animal is big and grey with a long trunk?", answer: "Elephant. (Elefant)" },
+					{ points: 400, question: "What do we call a baby dog in English?", answer: "Puppy." },
+					{ points: 500, question: "Name three farm animals in English.", answer: "Any three of: cow, pig, chicken, horse, sheep. (z. B. cow, pig, chicken)" }
+				]
+			},
+			{
+				name: "Family",
+				color: "#7AE582",
+				questions: [
+					{ points: 100, question: "What is the English word for 'Mutter'?", answer: "Mother." },
+					{ points: 200, question: "What is the English word for 'Vater'?", answer: "Father." },
+					{ points: 300, question: "What is the English word for 'Bruder'?", answer: "Brother." },
+					{ points: 400, question: "What is the English word for 'Grossvater'?", answer: "Grandfather." },
+					{ points: 500, question: "Name four family members in English.", answer: "Any four of: mother, father, sister, brother, grandmother, grandfather." }
+				]
+			},
+			{
+				name: "Everyday Phrases",
+				color: "#FFD166",
+				questions: [
+					{ points: 100, question: "How do you say 'Hallo' in English?", answer: "Hello. / Hi." },
+					{ points: 200, question: "How do you say 'Tschuess' in English?", answer: "Goodbye. / Bye." },
+					{ points: 300, question: "How do you say 'Wie geht es dir?' in English?", answer: "How are you?" },
+					{ points: 400, question: "How do you say 'Ich heisse...' in English?", answer: "My name is..." },
+					{ points: 500, question: "Complete the dialogue: A: How are you? B: I'm ___, thank you.", answer: "fine / good (jede passende Antwort zaehlt)" }
+				]
+			}
+		];
+
+		var scores = { A: 0, B: 0 };
+		var usedCards = [];
+		var currentCat = -1;
+		var currentQ = -1;
+
+		function initUsedCards() {
+			usedCards = [];
+			var i;
+			for (i = 0; i < categories.length; i++) {
+				usedCards.push([false, false, false, false, false]);
+			}
+		}
+
+		function buildBoard() {
+			var board = document.getElementById("board");
+			board.innerHTML = "";
+			var i;
+			for (i = 0; i < categories.length; i++) {
+				var header = document.createElement("div");
+				header.className = "cat-header";
+				header.style.backgroundColor = categories[i].color;
+				header.textContent = categories[i].name;
+				board.appendChild(header);
+			}
+			var j;
+			for (j = 0; j < 5; j++) {
+				var k;
+				for (k = 0; k < categories.length; k++) {
+					var card = document.createElement("div");
+					card.className = "point-card";
+					card.style.backgroundColor = categories[k].color;
+					card.textContent = categories[k].questions[j].points;
+					card.setAttribute("data-cat", k);
+					card.setAttribute("data-q", j);
+					if (usedCards[k][j]) {
+						card.className = "point-card used";
+						card.textContent = "";
+					}
+					card.onclick = makeCardClickHandler(k, j);
+					board.appendChild(card);
+				}
+			}
+		}
+
+		function makeCardClickHandler(catIndex, qIndex) {
+			return function() {
+				if (usedCards[catIndex][qIndex]) {
+					return;
+				}
+				openQuestion(catIndex, qIndex);
+			};
+		}
+
+		function openQuestion(catIndex, qIndex) {
+			currentCat = catIndex;
+			currentQ = qIndex;
+			var cat = categories[catIndex];
+			var q = cat.questions[qIndex];
+			var popupCat = document.getElementById("popupCat");
+			popupCat.textContent = cat.name;
+			popupCat.style.backgroundColor = cat.color;
+			document.getElementById("popupPoints").textContent = q.points + " Punkte";
+			document.getElementById("popupQuestion").textContent = q.question;
+			document.getElementById("answerText").textContent = q.answer;
+			document.getElementById("answerBox").className = "answer-box";
+			document.getElementById("teamBtns").className = "team-btns";
+			document.getElementById("showAnswerBtn").style.display = "inline-block";
+			document.getElementById("questionOverlay").className = "overlay active";
+		}
+
+		function closeQuestion() {
+			document.getElementById("questionOverlay").className = "overlay";
+			currentCat = -1;
+			currentQ = -1;
+		}
+
+		function showAnswer() {
+			document.getElementById("answerBox").className = "answer-box show";
+			document.getElementById("teamBtns").className = "team-btns show";
+			document.getElementById("showAnswerBtn").style.display = "none";
+		}
+
+		function updateScoreDisplay() {
+			document.getElementById("teamAScore").textContent = scores.A;
+			document.getElementById("teamBScore").textContent = scores.B;
+		}
+
+		function awardPoints(team, correct) {
+			if (currentCat < 0 || currentQ < 0) {
+				return;
+			}
+			var pts = categories[currentCat].questions[currentQ].points;
+			if (team === "A") {
+				if (correct) {
+					scores.A = scores.A + pts;
+				} else {
+					scores.A = scores.A - pts;
+					if (scores.A < 0) {
+						scores.A = 0;
+					}
+				}
+			} else {
+				if (correct) {
+					scores.B = scores.B + pts;
+				} else {
+					scores.B = scores.B - pts;
+					if (scores.B < 0) {
+						scores.B = 0;
+					}
+				}
+			}
+			updateScoreDisplay();
+			usedCards[currentCat][currentQ] = true;
+			closeQuestion();
+			buildBoard();
+		}
+
+		function openResetConfirm() {
+			document.getElementById("resetOverlay").className = "overlay active";
+		}
+
+		function closeResetConfirm() {
+			document.getElementById("resetOverlay").className = "overlay";
+		}
+
+		function performReset() {
+			scores.A = 0;
+			scores.B = 0;
+			updateScoreDisplay();
+			initUsedCards();
+			buildBoard();
+			closeResetConfirm();
+		}
+
+		function selectAllText() {
+			this.select();
+		}
+
+		document.getElementById("showAnswerBtn").onclick = showAnswer;
+		document.getElementById("closePopupBtn").onclick = closeQuestion;
+		document.getElementById("aRightBtn").onclick = function() { awardPoints("A", true); };
+		document.getElementById("aWrongBtn").onclick = function() { awardPoints("A", false); };
+		document.getElementById("bRightBtn").onclick = function() { awardPoints("B", true); };
+		document.getElementById("bWrongBtn").onclick = function() { awardPoints("B", false); };
+		document.getElementById("resetBtn").onclick = openResetConfirm;
+		document.getElementById("confirmResetYes").onclick = performReset;
+		document.getElementById("confirmResetNo").onclick = closeResetConfirm;
+		document.getElementById("teamAName").onfocus = selectAllText;
+		document.getElementById("teamBName").onfocus = selectAllText;
+
+		initUsedCards();
+		buildBoard();
+		updateScoreDisplay();
+	</script>
+
+</body>
+
+</html>
